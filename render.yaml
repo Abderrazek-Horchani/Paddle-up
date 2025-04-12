@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: paddleup-backend
+    env: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://paddleup.onrender.com
+
+  - type: web
+    name: paddleup-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: .
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://paddleup-backend.onrender.com
+
+databases:
+  - name: paddleup-db
+    databaseName: paddleup
+    user: paddleup
+    plan: free 
