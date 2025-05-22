@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const stepIndicators = document.querySelectorAll('.step-indicator');
   const equipmentOptions = document.querySelectorAll('.btn-option');
   const durationOptions = document.querySelectorAll('.btn-duration');
-  const equipmentPrice = document.getElementById('equipmentPrice');
+  const equipmentSummary = document.getElementById('equipmentSummary');
   const durationText = document.getElementById('durationText');
   const totalPrice = document.getElementById('totalPrice');
   const submitButton = form.querySelector('button[type="submit"]');
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function calculatePrice() {
     if (!selectedEquipment || !selectedDuration) {
-      equipmentPrice.textContent = '0DT';
+      equipmentSummary.textContent = '0DT';
       durationText.textContent = '0 hours';
       totalPrice.textContent = '0DT';
       return;
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const discount = durationDiscounts[selectedDuration];
     const total = Math.round(basePrice * hours * (1 - discount));
 
-    equipmentPrice.textContent = `${basePrice}DT/h`;
+    equipmentSummary.textContent = `${basePrice}DT/h`;
     durationText.textContent = `${hours} hour${hours > 1 ? 's' : ''}`;
     totalPrice.textContent = `${total}DT`;
   }
@@ -233,13 +233,16 @@ document.addEventListener('DOMContentLoaded', function() {
       showStep(2);
     });
   }
-
+const GRIST_DOC_ID = 'cG5Aze1sYs6s';
+const GRIST_API_KEY = 'fb6f10893b6ffa867c67e1af47a6e3e14dbab413';
+const GRIST_TABLE_ID = 'PaddleUp';
   // Form submission
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const name = document.getElementById('name').value;
     const whatsapp = document.getElementById('whatsapp').value;
+    const email = document.getElementById('email').value;
     const kayakQuantity = parseInt(document.querySelector('#kayakQuantity').value);
     const paddleQuantity = parseInt(document.querySelector('#paddleQuantity').value);
     const duration = document.querySelector('.btn-duration.active')?.dataset.duration;
@@ -264,50 +267,55 @@ document.addEventListener('DOMContentLoaded', function() {
     else if (duration === 'full') totalPrice *= 0.75; // 25% discount
     
     // Store booking in localStorage
-    const booking = {
-      name,
-      whatsapp,
-      kayakQuantity,
-      paddleQuantity,
-      duration,
-      date: bookingDate,
-      time: bookingTime,
-      totalPrice: Math.round(totalPrice),
-      status: 'pending',
-      timestamp: new Date().toISOString()
-    };
+    const bookingData = {
+    Name: name,
+    WhatsApp: whatsapp,
+    Email: email || '', // Optional field
+    Kayak_Quantity: kayakQuantity,
+    Paddle_Quantity: paddleQuantity,
+    Duration: duration === 'full' ? 'Full Day' : `${duration} hours`,
+    Booking_Date: bookingDate || '',
+    Booking_Time: bookingTime || '',
+    Total_Price: Math.round(totalPrice),
+    Status: 'Pending',
+    Created_At: new Date().toISOString()
+  };
     
-    const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-    bookings.push(booking);
-    localStorage.setItem('bookings', JSON.stringify(bookings));
+   const submitButton = this.querySelector('button[type="submit"]');
+  const originalButtonText = submitButton.innerHTML;
+  submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+  submitButton.disabled = true;
+try {
+    // Send data to Grist
+    const response = await fetch(`https://docs.getgrist.com/api/docs/${GRIST_DOC_ID}/tables/${GRIST_TABLE_ID}/records`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${GRIST_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        records: [
+          {
+            fields: bookingData
+          }
+        ]
+      })
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
-    // Create WhatsApp message
-    let message = `*New Booking Request*\n\n`;
-    message += `*Customer Details:*\n`;
-    message += `Name: ${name}\n`;
-    message += `WhatsApp: ${whatsapp}\n\n`;
-    message += `*Booking Details:*\n`;
-    if (kayakQuantity > 0) {
-      message += `Kayaks: ${kayakQuantity}\n`;
-    }
-    if (paddleQuantity > 0) {
-      message += `Paddle Boards: ${paddleQuantity}\n`;
-    }
-    message += `Duration: ${duration === 'full' ? 'Full Day' : `${duration} hour${duration > 1 ? 's' : ''}`}\n`;
-    if (bookingDate) {
-      message += `Date: ${bookingDate}\n`;
-    }
-    if (bookingTime) {
-      message += `Time: ${bookingTime}\n`;
-    }
-    message += `Total Price: ${Math.round(totalPrice)}DT\n`;
-    
-    // Encode message for WhatsApp URL
-    const encodedMessage = encodeURIComponent(message);
-    
-    // Open WhatsApp with pre-filled message
-    const whatsappUrl = `https://wa.me/${WHATSAPP_PHONE_NUMBER}?text=${encodedMessage}`;
-    window.open(whatsappUrl, '_blank');
+    const result = await response.json();
+    console.log('Booking saved successfully:', result);
+
+    // Optional: Still store locally as backup
+    const localBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+    localBookings.push({
+      ...bookingData,
+      gristId: result.records[0]?.id || null
+    });
+    localStorage.setItem('bookings', JSON.stringify(localBookings));
+
     
     // Reset form
     this.reset();
@@ -317,7 +325,28 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show success message
     alert('Booking request sent successfully! Please check your WhatsApp to confirm the booking.');
-  });
+  }
+ catch (error) {
+    console.error('Error submitting booking:', error);
+    
+    // Show error message
+    alert('Sorry, there was an error submitting your booking. Please try again or contact us directly.');
+    
+    // Optional: Store locally if server fails
+    const localBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+    localBookings.push({
+      ...bookingData,
+      syncStatus: 'failed',
+      error: error.message
+    });
+    localStorage.setItem('bookings', JSON.stringify(localBookings));
+    
+  } finally {
+    // Restore button state
+    submitButton.innerHTML = originalButtonText;
+    submitButton.disabled = false;
+  }
+});
 
   // Initialize price summary
   updatePriceSummary();
