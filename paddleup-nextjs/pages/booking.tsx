@@ -356,6 +356,23 @@ currentDurationText += `Kayak: ${selectedKayakDuration === 'full' ? 'Full Day' :
                   </div>
                 </div>
 
+                 {/* Price Summary (added to Step 2) */}
+                 <div className="price-summary mb-4 p-3 bg-light rounded">
+                    <div className="d-flex justify-content-between mb-2">
+                      <span>Equipment</span>
+                      <span className="text-primary" id="equipmentSummary">{equipmentSummary}</span>
+                    </div>
+                    <div className="d-flex justify-content-between mb-2">
+                      <span>Duration</span>
+                       <span id="durationText">{durationText}</span>
+                    </div>
+                    <hr />
+                    <div className="d-flex justify-content-between">
+                      <strong>Total</strong>
+                      <strong className="text-primary" id="totalPrice">{totalPrice}</strong>
+                    </div>
+                  </div>
+
                 <div className="text-center mt-4">
                   <button type="button" className="btn btn-primary" id="continueToContact" onClick={handleContinueToContact}>
                     Continue to Contact <i className="fas fa-arrow-right ms-2"></i>
@@ -409,7 +426,7 @@ currentDurationText += `Kayak: ${selectedKayakDuration === 'full' ? 'Full Day' :
                     </div>
                   </div>
                   <button type="submit" className={`btn btn-primary btn-lg w-100 ${isSubmitting ? 'loading' : ''}`} disabled={isSubmitting}>
-                     {isSubmitting ? '': 'Confirm Booking'}
+                     {isSubmitting ? '' : 'Confirm Booking'}
                   </button>
                 </form>
               </div>
