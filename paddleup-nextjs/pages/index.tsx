@@ -11,8 +11,8 @@ export default function Home() {
       </Head>
 
       {/* Hero Section */}
-      <section className="hero-section">
-        <div className="container text-center py-5">
+      <section className="hero-section" style={{ backgroundImage: 'url("/images/hero.webp")', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <div className="container text-center py-5" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
           <h1>Kayak & Surfboard Rentals in Kelibia</h1>
           <p className="lead">Adventure starts here – with free lemon juice! 🍋</p>
           <Link href="/booking" legacyBehavior>
