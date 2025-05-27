@@ -18,8 +18,8 @@ export default function Booking() {
 
   // Prices and discounts from original main.js
   const prices = {
-    kayak: 25,
-    paddle: 30,
+    kayak: 35,
+    paddle: 20,
   };
 
   const durationDiscounts: { [key: number | string]: number } = {
