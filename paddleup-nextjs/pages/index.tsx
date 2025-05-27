@@ -104,7 +104,7 @@ export default function Home() {
                 <h3 className="h5 mb-3">Our Location</h3>
                 <div className="map">
                   <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3239.1234567890123!2d11.123456!3d36.123456!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzbCsDA3JzI0LjQiTiAxMcKwMDcnMjQuNCJF!5e0!3m2!1sen!2stn!4v1234567890!5m2!1sen!2stn"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d368.95453834935114!2d11.12398118802644!3d36.848321895163224!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x131d3231b75992a1%3A0xfbe3b874506fbaf8!2sPlage%20du%20Petit%20Paris!5e1!3m2!1sfr!2stn!4v1748354742489!5m2!1sfr!2stn"
                     width="100%"
                     height="250"
                     style={{ border: 0 }}
